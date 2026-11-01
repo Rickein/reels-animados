@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Pranchas de Estilo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=Inter+Tight:wght@500;800&family=Jersey+15&family=Jersey+25&family=Permanent+Marker&family=Shantell+Sans:wght@400;800&display=swap">
+<style>
+  body{margin:0;background:#1b1b1d;color:#eee;font:14px/1.4 system-ui,sans-serif}
+  header{position:sticky;top:0;z-index:2;display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:10px 16px;background:#1b1b1d;border-bottom:1px solid #333}
+  header h1{font-size:15px;margin:0 12px 0 0}
+  button{background:#2a2a2e;color:#eee;border:1px solid #444;border-radius:6px;padding:6px 12px;cursor:pointer;font:inherit}
+  button.on{background:#f0f0f0;color:#111}
+  #dica{color:#9a9a9f;font-size:12px;width:100%}
+  #quadros{display:flex;gap:16px;padding:16px;justify-content:center;align-items:flex-start}
+  #quadros canvas{flex:1 1 0;min-width:0;max-width:560px;width:100%;height:auto;display:block;border-radius:4px;box-shadow:0 2px 12px #0006;cursor:pointer}
+  body.uma #quadros canvas{display:none}
+  body.uma #quadros canvas.sel{display:block;flex:none;width:auto;height:calc(100vh - 120px);max-width:none}
+</style>
+</head>
+<body>
+<header>
+  <h1>Pranchas de estilo</h1>
+  <button data-v="todas" class="on">Lado a lado</button>
+  <button data-v="A">A</button><button data-v="B">B</button><button data-v="C">C</button>
+  <span id="dica">Clique no vídeo de uma prancha para ligar/desligar o som (voz + efeitos). Clique em um item da lista SONS para ouvir só aquele efeito. Os tempos das palavras aqui são aproximados: a sincronia exata vem da transcrição (Etapa 4).</span>
+</header>
+<main id="quadros"></main>
+<script src="pranchas.js"></script>
+</body>
+</html>

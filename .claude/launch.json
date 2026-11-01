@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "previa",
+      "runtimeExecutable": "node",
+      "runtimeArgs": ["ferramentas/servidor_previa.js", ".", "8765"],
+      "port": 8765
+    }
+  ]
+}

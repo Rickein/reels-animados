@@ -1,0 +1,23 @@
+# ambiente e caches
+.venv/
+__pycache__/
+*.pyc
+
+# arquivos de cada video (grandes e pessoais)
+Bruto/*
+!Bruto/.gitkeep
+trabalhos/*
+!trabalhos/.gitkeep
+
+# modelos baixados pelo instalar.ps1 / no primeiro uso
+modelos/*
+!modelos/.gitkeep
+
+# imagens geradas (refazer com montar_biblioteca.py)
+biblioteca/png/
+biblioteca/teste_sobre_video.png
+biblioteca/demo_animacao.mp4
+pranchas/*.png
+
+# configuracao local do Claude Code
+.claude/settings.local.json

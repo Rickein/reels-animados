@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Revisar Transcrição</title>
+<style>
+  :root{--bg:#FFF8F1;--tinta:#6E2A6B;--marca:#FFB48F;--texto:#2A1A2B;--apoio:#D9467A;--suave:#7A6377}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--texto);font:16px/1.6 system-ui,sans-serif}
+  main{display:flex;gap:24px;padding:16px;align-items:flex-start;flex-wrap:wrap}
+  video{width:300px;max-width:100%;border-radius:8px;border:3px solid var(--tinta);position:sticky;top:16px}
+  #texto{flex:1;min-width:280px;max-width:760px}
+  h1{font-size:18px;color:var(--tinta);margin:0 0 4px}
+  .dica{color:var(--suave);font-size:13px;margin:0 0 16px}
+  .frase{margin:0 0 14px;padding:8px 10px;border-left:4px solid transparent;border-radius:4px}
+  .frase.ativa{border-left-color:var(--tinta);background:#fff}
+  .tempo{font:12px ui-monospace,monospace;color:var(--suave);margin-right:6px;cursor:pointer}
+  .p{cursor:pointer;border-radius:3px;padding:0 1px}
+  .p:hover{outline:1px solid var(--tinta)}
+  .p.duvida{text-decoration:underline wavy var(--apoio);text-underline-offset:4px}
+  .p.editada{color:var(--tinta);font-weight:600}
+  .p.agora{background:var(--marca)}
+  .legenda{display:flex;gap:16px;font-size:13px;color:var(--suave);margin-bottom:12px;flex-wrap:wrap}
+</style>
+</head>
+<body>
+<main>
+  <video id="v" controls playsinline></video>
+  <section id="texto">
+    <h1>Revisão da transcrição</h1>
+    <p class="dica">Clique em uma palavra para ouvir aquele trecho. A palavra falada fica marcada em pêssego.</p>
+    <div class="legenda"><span><span class="p duvida">sublinhado</span> = baixa confiança</span><span><span class="p editada">roxo</span> = corrigida</span></div>
+    <div id="frases"></div>
+  </section>
+</main>
+<script>
+const q = new URLSearchParams(location.search);
+const v = document.getElementById('v');
+v.src = q.get('video');
+const fmt = s => `${String(Math.floor(s / 60)).padStart(2, '0')}:${(s % 60).toFixed(1).padStart(4, '0')}`;
+fetch(q.get('palavras')).then(r => r.json()).then(d => {
+  const box = document.getElementById('frases'), spans = [], linhas = [];
+  const tocar = t => { v.currentTime = Math.max(0, t - 0.15); v.play(); };
+  d.frases.forEach(f => {
+    const div = document.createElement('div'); div.className = 'frase';
+    const tm = document.createElement('span'); tm.className = 'tempo'; tm.textContent = fmt(f.inicio); tm.onclick = () => tocar(f.inicio); div.append(tm);
+    for (let i = f.palavras[0]; i < f.palavras[1]; i++) {
+      const p = d.palavras[i], s = document.createElement('span');
+      s.className = 'p' + (p.confianca < 0.5 ? ' duvida' : '') + (p.editada ? ' editada' : '');
+      s.textContent = p.texto; s.title = `${fmt(p.inicio)} → ${fmt(p.fim)} · confiança ${Math.round(p.confianca * 100)}%`;
+      s.onclick = () => tocar(p.inicio); div.append(s, ' '); spans.push([p, s]);
+    }
+    box.append(div); linhas.push([f, div]);
+  });
+  const atualizar = () => {
+    const t = v.currentTime;
+    spans.forEach(([p, s]) => s.classList.toggle('agora', t >= p.inicio && t < p.fim));
+    linhas.forEach(([f, div]) => div.classList.toggle('ativa', t >= f.inicio && t < f.fim + 0.3));
+    requestAnimationFrame(atualizar);
+  };
+  atualizar();
+});
+</script>
+</body>
+</html>

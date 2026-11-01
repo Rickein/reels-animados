@@ -1,0 +1,11 @@
+# Bibliotecas do projeto (instale com: .venv\Scripts\python -m pip install -r requirements.txt)
+numpy
+pillow
+opencv-python
+faster-whisper
+onnxruntime
+
+# Placa de video NVIDIA: bibliotecas CUDA 12 que o faster-whisper usa na GPU
+# (se nao tiver NVIDIA, pode remover estas duas linhas: a transcricao roda na CPU)
+nvidia-cublas-cu12
+nvidia-cudnn-cu12==9.*

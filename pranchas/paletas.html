@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Paletas da Direção B</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=Inter+Tight:wght@500;800&family=Jersey+15&family=Jersey+25&family=Permanent+Marker&family=Shantell+Sans:wght@400;800&display=swap">
+<style>
+  body{margin:0;background:#1b1b1d;color:#eee;font:14px/1.4 system-ui,sans-serif}
+  header{position:sticky;top:0;z-index:2;padding:10px 16px;background:#1b1b1d;border-bottom:1px solid #333}
+  header h1{font-size:15px;margin:0 0 4px}
+  #dica{color:#9a9a9f;font-size:12px}
+  #quadros{display:flex;gap:12px;padding:16px;justify-content:center;align-items:flex-start}
+  #quadros canvas{flex:1 1 0;min-width:0;max-width:420px;width:100%;height:auto;display:block;border-radius:4px;box-shadow:0 2px 12px #0006;cursor:pointer}
+</style>
+</head>
+<body>
+<header>
+  <h1>Direção B · opções de paleta</h1>
+  <span id="dica">Mesma cena, mesmas animações, só a paleta muda. Clique em um quadro para ligar/desligar o som.</span>
+</header>
+<main id="quadros"></main>
+<script>window.SEM_MAIN = true;</script>
+<script src="pranchas.js"></script>
+<script>
+'use strict';
+const OPCOES = [
+  { nome: 'Atual', sub: 'azul Bic (referência)', c: { ...DB.c } },
+  { nome: '1 · Framboesa', sub: 'rosa adulto, quase monocromático', c: { fundo: '#FFF5F3', principal: '#C2185B', destaque: '#FFB0CB', texto: '#2B1A22', apoio: '#17907A' } },
+  { nome: '2 · Chiclete', sub: 'rosa-choque + amarelo, pop e divertida', c: { fundo: '#FFF7F9', principal: '#E5306B', destaque: '#FFE14D', texto: '#241420', apoio: '#6C4BD8' } },
+  { nome: '3 · Ameixa', sub: 'ameixa + pêssego, sofisticada e quente', c: { fundo: '#FFF8F1', principal: '#6E2A6B', destaque: '#FFB48F', texto: '#2A1A2B', apoio: '#D9467A' } },
+  { nome: '4 · Violeta', sub: 'violeta + manteiga, contraste máximo', c: { fundo: '#FAF7FF', principal: '#6D45D9', destaque: '#FFE07A', texto: '#1E1733', apoio: '#F06292' } },
+];
+const CW = 560, CH = 1330;
+const PAPEIS = [['fundo', 'papel'], ['principal', 'tinta da caneta'], ['destaque', 'marca-texto'], ['texto', 'legenda'], ['apoio', 'verdade ✓']];
+
+class Coluna {
+  constructor(op, old, nw) {
+    const d = Object.create(DB); d.c = op.c; d.sp = null;   // mesma direcao B, so a paleta muda
+    this.op = op; this.b = new Board(d); this.b.old = old; this.b.nw = nw; boards.push(this.b);
+    this.cv = document.createElement('canvas'); this.cv.width = CW; this.cv.height = CH; this.g = this.cv.getContext('2d');
+    this.cache = document.createElement('canvas'); this.cache.width = CW; this.cache.height = CH;
+    this.cv.addEventListener('click', () => this.b.alternarSom());
+    this.estatico();
+  }
+  estatico() {
+    const d = this.b.d, c = d.c, g = this.cache.getContext('2d');
+    g.fillStyle = c.fundo; g.fillRect(0, 0, CW, CH);
+    g.strokeStyle = d.pauta(); g.lineWidth = 2; for (let y = 1000; y < CH; y += 44) { g.beginPath(); g.moveTo(0, y); g.lineTo(CW, y); g.stroke(); }
+    g.textBaseline = 'top';
+    g.fillStyle = c.principal; fit(g, d.fT, this.op.nome, 46, 520); g.fillText(this.op.nome, 20, 992);
+    g.fillStyle = c.texto; fit(g, d.fN, this.op.sub, 23, 520); g.fillText(this.op.sub, 22, 1048);
+    PAPEIS.forEach(([k, papel], i) => {
+      const y = 1096 + i * 46; d.chip(g, 20, y, 38, c[k]);
+      g.fillStyle = c.texto; g.font = d.fL(21); g.fillText(papel, 74, y + 6);
+      g.textAlign = 'right'; g.font = d.fN(21); g.fillText(c[k].toUpperCase(), 540, y + 6); g.textAlign = 'left';
+    });
+  }
+  desenhar(still) {
+    const g = this.g; g.drawImage(this.cache, 0, 0); g.drawImage(this.b.F, 10, 10, 540, 960);
+    hand(g, rectPts(8, 8, 544, 964), { seed: 5, amp: 2, w: 5, color: this.b.d.c.principal, closed: true, step: 18 });
+    if (!still && this.b.som) { g.font = '600 18px system-ui'; g.fillStyle = 'rgba(0,0,0,.55)'; rrect(g, 20, 20, 120, 30, 15); g.fill(); g.fillStyle = '#fff'; g.fillText('🔊 som ligado', 30, 26); }
+  }
+  tick() {
+    const b = this.b, d = b.d; if (b.pausado) return;
+    let t = b.v.currentTime - d.seg;
+    if (t >= d.L || t < -0.3) { b.v.currentTime = d.seg; b.prevT = 0; t = 0; }
+    t = Math.max(0, t);
+    if (b.som) for (const e of d.events) if (e.t > b.prevT && e.t <= t) tocar(e.s);
+    b.prevT = t; b.renderMock(t, false); this.desenhar(false);
+  }
+}
+
+const colunas = [];
+async function mainPaletas() {
+  await carregarFontes();
+  const cap = document.createElement('video'); cap.src = VIDEO; cap.muted = true; cap.preload = 'auto';
+  await new Promise(r => { if (cap.readyState >= 2) r(); else cap.onloadeddata = r; });
+  const old = await capturar(cap, DB.seg + DB.L - 0.15), nw = await capturar(cap, DB.seg + 0.05);
+  for (const op of OPCOES) { const col = new Coluna(op, old, nw); colunas.push(col); document.getElementById('quadros').appendChild(col.cv); }
+  for (const col of colunas) { col.b.v.currentTime = DB.seg; try { await col.b.v.play(); } catch (e) { console.warn(e); } }
+  const loop = () => { colunas.forEach(c => c.tick()); requestAnimationFrame(loop); }; loop();
+  window.pronto = true;
+}
+// grava a comparacao (quadro heroi de cada paleta) em pranchas/paletas_B.png
+async function salvarPaletas() {
+  const all = document.createElement('canvas'); all.width = colunas.length * (CW + 20) + 20; all.height = CH + 40;
+  const ag = all.getContext('2d'); ag.fillStyle = '#1b1b1d'; ag.fillRect(0, 0, all.width, all.height);
+  for (const [i, col] of colunas.entries()) {
+    const b = col.b; b.pausado = true; b.v.pause();
+    await new Promise(r => { b.v.onseeked = r; b.v.currentTime = DB.seg + DB.hero; });
+    b.renderMock(DB.hero, true); col.desenhar(true); ag.drawImage(col.cv, 20 + i * (CW + 20), 20);
+  }
+  const blob = await new Promise(r => all.toBlob(r, 'image/png'));
+  await fetch('/salvar?nome=paletas_B.png', { method: 'POST', body: blob });
+  for (const col of colunas) { col.b.pausado = false; col.b.v.currentTime = DB.seg; col.b.v.play(); }
+  return 'ok';
+}
+window.salvarPaletas = salvarPaletas;
+mainPaletas();
+</script>
+</body>
+</html>
