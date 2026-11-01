@@ -12,7 +12,7 @@ as regras combinadas e os formatos prontos.
 1. Instale o [Git](https://git-scm.com/download/win) e o [Claude Code](https://claude.com/claude-code).
 2. Baixe o projeto:
    ```
-   git clone https://github.com/SEU-USUARIO/reels-animados.git
+   git clone https://github.com/Rickein/reels-animados.git
    ```
 3. Abra a pasta no Claude Code e peça: **"instala o projeto"**. A skill explica o que vai instalar e pede
    o ok antes. Também dá para rodar direto:
